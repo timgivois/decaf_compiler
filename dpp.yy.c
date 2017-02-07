@@ -847,7 +847,7 @@ YY_RULE_SETUP
 		BEGIN(definition);
 		
 		strcpy(actDefName, yytext+8);
-		++line_num;
+		
 		}
 	YY_BREAK
 case 9:
@@ -868,34 +868,31 @@ YY_RULE_SETUP
 		trim(actDefName);
 		//printf("Mapping %s with %s", actDefName, yytext);
 		mapOfWords.insert(std::make_pair(actDefName, yytext));
-		++line_num;
-		
+
 		}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 87 "dpp.l"
+#line 86 "dpp.l"
 {
 		if (mapOfWords.find(yytext+1) != mapOfWords.end())
 			printf("%s", mapOfWords.find(yytext+1)->second.c_str());
 		else
 			ReportError::InvalidDirective(line_num);
-		++line_num;
 		
 		}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 96 "dpp.l"
+#line 94 "dpp.l"
 {
-			++line_num;
 			ReportError::InvalidDirective(line_num);
 		}
 	YY_BREAK
 case 13:
 /* rule 13 can match eol */
 YY_RULE_SETUP
-#line 100 "dpp.l"
+#line 97 "dpp.l"
 {
 	printf("\n");
 	++line_num;
@@ -903,10 +900,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 104 "dpp.l"
+#line 101 "dpp.l"
 ECHO;
 	YY_BREAK
-#line 910 "dpp.yy.c"
+#line 907 "dpp.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(definition):
 case YY_STATE_EOF(c_string):
@@ -1905,7 +1902,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 104 "dpp.l"
+#line 101 "dpp.l"
 
 
 

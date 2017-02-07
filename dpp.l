@@ -65,7 +65,7 @@ int line_num = 1;
 		BEGIN(definition);
 		
 		strcpy(actDefName, yytext+8);
-		++line_num;
+		
 		}
 		
 \#define[ \t][a-z0-9 ]*	{
@@ -80,8 +80,7 @@ int line_num = 1;
 		trim(actDefName);
 		//printf("Mapping %s with %s", actDefName, yytext);
 		mapOfWords.insert(std::make_pair(actDefName, yytext));
-		++line_num;
-		
+
 		}
 
 \#[A-Z]*	{
@@ -89,12 +88,10 @@ int line_num = 1;
 			printf("%s", mapOfWords.find(yytext+1)->second.c_str());
 		else
 			ReportError::InvalidDirective(line_num);
-		++line_num;
 		
 		}
 		
 \#[a-z]* {
-			++line_num;
 			ReportError::InvalidDirective(line_num);
 		}
 \n {
