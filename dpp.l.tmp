@@ -1,0 +1,129 @@
+/* File:  dpp.l
+ * ----------------
+ * Lex inupt file to generate the scanner for the compiler.
+ */
+
+%{
+
+#include <stdio.h>
+#include <string.h>
+#include "scanner.h"
+#include "utility.h" // for PrintDebug()
+#include "errors.h"
+
+#include "stringHashMap.h"
+
+static uint64_t djb2(char **entry) {
+	unsigned long hash = 5381;
+	for(char *c = *entry; *c; ++c) {
+		hash = ((hash << 5) + hash) + *c;
+	}
+	return hash;
+}
+
+
+struct entry {
+	uint64_t hash;
+	char line[128];
+};
+
+char actDefName[128];
+
+stringHashMap map;
+
+//struct entry entryRead;
+
+%}
+
+
+%x comment
+%x definition
+
+%%
+
+"//"[^\n]* ;
+
+"/*"  BEGIN(comment);
+<comment>[^*\n]* 
+<comment>"*"+[^*/\n]* 
+<comment>\n   {printf("\n");}
+<comment>"*"+"/"  {BEGIN(INITIAL);}
+	
+
+
+\#define[ \t][A-Z ]* {
+		BEGIN(definition);
+		
+		strcpy(actDefName, yytext+8);
+		}
+
+<definition>[^\n].*	{
+		BEGIN(INITIAL);
+		
+		trim(actDefName);
+		struct entry entryRead, *entryFound;
+		
+		char* key = actDefName;
+		entryRead.hash = djb2(&key);
+		strcpy(entryRead.line, yytext);
+
+		entryFound = &entryRead;
+		
+		HashMapPutResult result = stringHashMapPut(&map, &entryFound, HMDR_FAIL);
+
+		if(result == HMPR_FAILED) {
+			printf("NO SE PUSO TOKEN %s", entryFound->line);break;
+		}else{
+			printf("AL_HASH_LLAVE \"%s\", AL_HASH_LINE: \"%s\" y el hash es %d", key, entryRead.line, entryRead.hash);
+		}
+		
+		}
+
+\#([A-Z]*)	{
+		struct entry entryRead, *entryFound;
+		char true_text[128];
+		
+		strcpy(true_text, yytext+1);
+		
+		char* key = true_text;
+
+		entryRead.hash = djb2(&key);
+		printf("%d", entryRead.hash);
+		
+		entryFound = &entryRead;
+		
+		bool result = stringHashMapFind(&map, &entryFound);
+		
+		printf(" %s ", result);
+		
+		printf ("%s",entryRead.line);
+
+		if(result) {
+			printf("POOOONNNNEEEEEE %s por %s", entryFound->line, map);
+		}else{
+			printf(" NADA para %s ", true_text);	
+		}
+
+		}
+%%
+
+
+#define ENTRY_CMP(left, right) left->hash == right->hash
+#define ENTRY_HASH(entry) entry->hash
+
+
+DECLARE_HASHMAP(stringHashMap, ENTRY_CMP, ENTRY_HASH, free, realloc)
+
+int main(int argc, char *argv[])
+{
+  	int ch;
+
+	FILE *fp;
+	fp=stdin;
+
+  	yylex(); 
+
+  while ((ch = getc(fp)) != EOF)
+    putc(ch, stdout);
+  return 0;
+}

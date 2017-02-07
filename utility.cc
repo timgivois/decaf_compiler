@@ -80,3 +80,13 @@ void ParseCommandLine(int argc, char *argv[])
     SetDebugForKey(argv[i], true);
 }
 
+/* Function to remove white spaces on both sides of a string i.e trim */
+
+void trim (char *s)
+{
+    int i;
+
+    while (isspace (*s)) s++;   // skip left side white spaces
+    for (i = strlen (s) - 1; (isspace (s[i])); i--) ;   // skip right side white spaces
+    s[i + 1] = '\0';
+}

@@ -29,7 +29,7 @@ typedef enum {
     T_Extends, T_This, T_Implements, T_Interface, T_New, T_NewArray,
     T_Identifier, T_StringConstant, T_IntConstant, T_DoubleConstant,
     T_BoolConstant,
-    T_NumTokenTypes
+     T_Print, T_ReadInteger, T_ReadLine, T_Dims, T_NumTokenTypes
 } TokenType;
 
  
@@ -43,7 +43,8 @@ static const char *gTokenNames[T_NumTokenTypes] = {
   "T_And", "T_Or", "T_While", "T_For", "T_If", "T_Else", "T_Return",
   "T_Break", "T_Extends", "T_This", "T_Implements", "T_Interface",
   "T_New", "T_NewArray","T_Identifier", "T_StringConstant",
-  "T_IntConstant", "T_DoubleConstant", "T_BoolConstant", 
+  "T_IntConstant", "T_DoubleConstant", "T_BoolConstant", "T_Print",
+  "T_ReadInteger", "T_ReadLine", "T_Dims"
 };
 
  

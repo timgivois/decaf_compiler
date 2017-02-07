@@ -10,8 +10,8 @@
 #include "scanner.h"
 #include "utility.h" // for PrintDebug()
 #include "errors.h"
-#include <map>
 
+#include "stringHashMap.h"
 
 static uint64_t djb2(char **entry) {
 	unsigned long hash = 5381;
@@ -27,12 +27,11 @@ struct entry {
 	char line[128];
 };
 
-std::map<string, string> mapOfWords;
-
 char actDefName[128];
 
+stringHashMap map;
 
-int line_num = 1;
+int line_num;
 
 
 //struct entry entryRead;
@@ -42,18 +41,15 @@ int line_num = 1;
 
 %x comment
 %x definition
-%x c_string
-%%
 
-\"[^"\n]*\"? {printf(yytext);} 
+%%
 
 "//"[^\n]* ;
 
 "/*"  BEGIN(comment);
 <comment>[^*\n]* 
 <comment>"*"+[^*/\n]*
-<comment>\n   {++line_num;
-	printf("\n");}
+<comment>\n   {printf("\n");}
 <comment>"*"+"/"  {BEGIN(INITIAL);}
 	
 <comment><<EOF>> {
@@ -61,40 +57,48 @@ int line_num = 1;
 	yyterminate();
 }
 
-\#define[ \t][A-Z ]*	{
+\#define[ \t][A-Z]*	{
 		BEGIN(definition);
 		
 		strcpy(actDefName, yytext+8);
-		++line_num;
 		}
-		
-\#define[ \t][a-z0-9 ]*	{
-				
-				ReportError::InvalidDirective(line_num);
-				}
 
 <definition>[^\n].*	{
-		
 		BEGIN(INITIAL);
+
+		struct entry entryRead, *entryFound;
+
+		char* key = actDefName;
+		entryRead.hash = djb2(&key);
+		strcpy(entryRead.line, yytext);
+
+		entryFound = &entryRead;
 		
-		trim(actDefName);
-		//printf("Mapping %s with %s", actDefName, yytext);
-		mapOfWords.insert(std::make_pair(actDefName, yytext));
-		++line_num;
-		
+		HashMapPutResult result = stringHashMapPut(&map, &entryFound, HMDR_FAIL);
+
 		}
 
 \#[A-Z]*	{
-		if (mapOfWords.find(yytext+1) != mapOfWords.end())
-			printf("%s", mapOfWords.find(yytext+1)->second.c_str());
-		else
-			ReportError::InvalidDirective(line_num);
-		++line_num;
+		struct entry entryRead, *entryFound;
+
+		char* key = yytext+1;
+
+		entryRead.hash = djb2(&key);
 		
+		entryFound = &entryRead;
+		
+		bool result = stringHashMapFind(&map, &entryFound);
+			
+		if(result) {
+			printf("%s", entryFound->line);
+		}else{
+			//ReportError::InvalidDirective(line_num);
+			printf("%s", yytext+1);
+		}
+
 		}
 		
 \#[a-z]* {
-			++line_num;
 			ReportError::InvalidDirective(line_num);
 		}
 \n {
@@ -103,6 +107,12 @@ int line_num = 1;
 }
 %%
 
+
+#define ENTRY_CMP(left, right) left->hash == right->hash
+#define ENTRY_HASH(entry) entry->hash
+
+
+DECLARE_HASHMAP(stringHashMap, ENTRY_CMP, ENTRY_HASH, free, realloc)
 
 int main(int argc, char *argv[])
 {

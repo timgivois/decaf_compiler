@@ -79,5 +79,6 @@ bool IsDebugOn(const char *key);
  * as being flags to turn on.
  */
 void ParseCommandLine(int argc, char *argv[]);
+void trim (char *s);
      
 #endif

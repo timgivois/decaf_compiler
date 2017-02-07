@@ -1,0 +1,13 @@
+int a;
+
+void main() {
+   int b;
+   int a;
+   int d;
+   string c;   
+
+   d = 2 + 3 * 4 - 6;
+   b = 3;
+   a = b + 2;
+   c = " // this is not a comment";
+}
